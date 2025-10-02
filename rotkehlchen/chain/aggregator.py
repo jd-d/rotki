@@ -87,7 +87,7 @@ from rotkehlchen.externalapis.etherscan import HasChainActivity
 from rotkehlchen.fval import FVal
 from rotkehlchen.greenlets.manager import GreenletManager
 from rotkehlchen.logging import RotkehlchenLogsAdapter
-from rotkehlchen.premium.premium import Premium
+from rotkehlchen.premium.premium import OfflinePremium, Premium
 from rotkehlchen.types import (
     CHAINS_WITH_CHAIN_MANAGER,
     CHAINS_WITH_TRANSACTIONS_TYPE,
@@ -292,7 +292,7 @@ class ChainsAggregator(CacheableMixIn, LockableQueryMixIn):
             msg_aggregator: MessagesAggregator,
             database: 'DBHandler',
             greenlet_manager: GreenletManager,
-            premium: Premium | None,
+            premium: Premium | OfflinePremium | None,
             data_directory: Path,
             beaconchain: 'BeaconChain',
             btc_derivation_gap_limit: int,
@@ -372,7 +372,7 @@ class ChainsAggregator(CacheableMixIn, LockableQueryMixIn):
     def set_dot_rpc_endpoint(self, endpoint: str) -> tuple[bool, str]:
         return self.polkadot.set_rpc_endpoint(endpoint)
 
-    def activate_premium_status(self, premium: Premium) -> None:
+    def activate_premium_status(self, premium: Premium | OfflinePremium) -> None:
         self.premium = premium
         for _, module in self.iterate_modules():
             if hasattr(module, 'premium') is True:
