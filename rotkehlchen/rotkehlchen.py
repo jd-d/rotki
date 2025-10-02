@@ -96,6 +96,7 @@ from rotkehlchen.inquirer import Inquirer
 from rotkehlchen.logging import RotkehlchenLogsAdapter
 from rotkehlchen.oracles.structures import CurrentPriceOracle
 from rotkehlchen.premium.premium import (
+    OfflinePremium,
     Premium,
     PremiumCredentials,
     has_premium_check,
@@ -153,10 +154,12 @@ class Rotkehlchen:
         """
         # Can also be None after unlock if premium credentials did not
         # authenticate or premium server temporarily offline
-        self.premium: Premium | None = None
+        self.premium: Premium | OfflinePremium | None = None
         self.user_is_logged_in: bool = False
 
         self.args = args
+        self.offline_premium_mode = self.args.offline_premium
+        self.premium_backend_enabled = not self.offline_premium_mode
         if self.args.data_dir is None:
             self.data_dir = default_data_directory()
         else:
@@ -321,10 +324,14 @@ class Rotkehlchen:
             self._perform_new_db_actions()
 
         self.data_importer = CSVDataImporter(db=self.data.db)
-        self.premium_sync_manager = PremiumSyncManager(
-            migration_manager=self.migration_manager,
-            data=self.data,
-        )
+        if self.premium_backend_enabled:
+            self.premium_sync_manager = PremiumSyncManager(
+                migration_manager=self.migration_manager,
+                data=self.data,
+            )
+        else:
+            self.premium_sync_manager = None
+            self.premium = OfflinePremium(self.msg_aggregator)
         # set the DB in the instances that need it
         self.cryptocompare.set_database(self.data.db)
         self.defillama.set_database(self.data.db)
@@ -334,25 +341,26 @@ class Rotkehlchen:
 
         # Anything that was set above here has to be cleaned in case of failure in the next step
         # by reset_after_failed_account_creation_or_login()
-        try:
-            self.premium = self.premium_sync_manager.try_premium_at_start(
-                given_premium_credentials=premium_credentials,
-                username=user,
-                create_new=create_new,
-                sync_approval=sync_approval,
-                sync_database=sync_database,
-            )
-        except PremiumAuthenticationError as e:
-            # Reraise it only if this is during the creation of a new account where
-            # the premium credentials were given by the user
-            if create_new:
-                raise
-            self.msg_aggregator.add_warning(
-                'Could not authenticate the rotki premium API keys found in the DB. '
-                f'Error: {e}. Check logs for more details',
-            )
-            # else let's just continue. User signed in successfully, but he just
-            # has unauthenticable/invalid premium credentials remaining in his DB
+        if self.premium_backend_enabled and self.premium_sync_manager is not None:
+            try:
+                self.premium = self.premium_sync_manager.try_premium_at_start(
+                    given_premium_credentials=premium_credentials,
+                    username=user,
+                    create_new=create_new,
+                    sync_approval=sync_approval,
+                    sync_database=sync_database,
+                )
+            except PremiumAuthenticationError as e:
+                # Reraise it only if this is during the creation of a new account where
+                # the premium credentials were given by the user
+                if create_new:
+                    raise
+                self.msg_aggregator.add_warning(
+                    'Could not authenticate the rotki premium API keys found in the DB. '
+                    f'Error: {e}. Check logs for more details',
+                )
+                # else let's just continue. User signed in successfully, but he just
+                # has unauthenticable/invalid premium credentials remaining in his DB
 
         with self.data.db.conn.read_ctx() as cursor:
             settings = self.get_settings(cursor)
@@ -544,6 +552,7 @@ class Rotkehlchen:
             msg_aggregator=self.msg_aggregator,
             data_updater=self.data_updater,
             username=user,
+            premium_backend_enabled=self.premium_backend_enabled,
         )
 
         self.migration_manager.maybe_migrate_data()
@@ -642,6 +651,9 @@ class Rotkehlchen:
         Raises PremiumAuthenticationError if the given key is rejected by the Rotkehlchen server
         """
         log.info('Setting new premium credentials')
+        if not self.premium_backend_enabled:
+            raise PremiumAuthenticationError('Premium backend is disabled in offline mode')
+
         if self.premium is not None:
             self.premium.set_credentials(credentials)
         else:
@@ -655,7 +667,8 @@ class Rotkehlchen:
             except RemoteError as e:
                 raise PremiumAuthenticationError(str(e)) from e
 
-        self.premium_sync_manager.premium = self.premium
+        if self.premium_sync_manager is not None:
+            self.premium_sync_manager.premium = self.premium
         self.accountant.activate_premium_status(self.premium)
         self.chains_aggregator.activate_premium_status(self.premium)
 
@@ -664,14 +677,16 @@ class Rotkehlchen:
     def deactivate_premium_status(self) -> None:
         """Deactivate premium in the current session"""
         self.premium = None
-        self.premium_sync_manager.premium = None
+        if self.premium_sync_manager is not None:
+            self.premium_sync_manager.premium = None
         self.accountant.deactivate_premium_status()
         self.chains_aggregator.deactivate_premium_status()
 
-    def activate_premium_status(self, premium: Premium) -> None:
+    def activate_premium_status(self, premium: Premium | OfflinePremium) -> None:
         """Activate premium in the current session if was deactivated"""
         self.premium = premium
-        self.premium_sync_manager.premium = self.premium
+        if self.premium_sync_manager is not None:
+            self.premium_sync_manager.premium = self.premium
         self.accountant.activate_premium_status(self.premium)
         self.chains_aggregator.activate_premium_status(self.premium)
 
@@ -1413,7 +1428,8 @@ class Rotkehlchen:
                 if len(failed_to_connect) != 0:
                     result['failed_to_connect'] = failed_to_connect
 
-                result[DBCacheStatic.LAST_DATA_UPLOAD_TS.value] = Timestamp(self.premium_sync_manager.last_remote_data_upload_ts)  # noqa: E501
+                if self.premium_sync_manager is not None:
+                    result[DBCacheStatic.LAST_DATA_UPLOAD_TS.value] = Timestamp(self.premium_sync_manager.last_remote_data_upload_ts)  # noqa: E501
         return result
 
     def shutdown(self) -> None:

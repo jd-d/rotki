@@ -132,6 +132,7 @@ class TaskManager:
             msg_aggregator: 'MessagesAggregator',
             data_updater: 'RotkiDataUpdater',
             username: str,
+            premium_backend_enabled: bool = True,
     ) -> None:
         self.should_schedule = False
         self.max_tasks_num = max_tasks_num
@@ -172,7 +173,6 @@ class TaskManager:
             self._maybe_schedule_exchange_history_query,
             self._maybe_schedule_evm_txreceipts,
             self._maybe_decode_evm_transactions,
-            self._maybe_check_premium_status,
             self._maybe_check_data_updates,
             self._maybe_update_snapshot_balances,
             self._maybe_update_yearn_vaults,
@@ -195,7 +195,9 @@ class TaskManager:
             self._maybe_query_graph_delegated_tokens,
             self._maybe_update_pendle_cache,
         ]
-        if self.premium_sync_manager is not None:
+        if premium_backend_enabled:
+            self.potential_tasks.insert(6, self._maybe_check_premium_status)
+        if premium_backend_enabled and self.premium_sync_manager is not None:
             self.potential_tasks.append(self._maybe_schedule_db_upload)
         self.schedule_lock = gevent.lock.Semaphore()
 

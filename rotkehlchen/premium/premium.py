@@ -132,6 +132,78 @@ UPLOAD_CHUNK_SIZE: Final = 10_000_000  # 10 MB
 MAX_UPLOAD_CHUNK_RETRIES: Final = 1
 
 
+class OfflinePremium:
+    """Local-only premium helper used when the backend is disabled."""
+
+    backend_enabled: Final[bool] = False
+    _OFFLINE_LIMITS: Final[UserLimits] = {
+        'limit_of_devices': 10,
+        'pnl_events_limit': 1_000_000,
+        'max_backup_size_mb': 5_000,
+        'history_events_limit': 1_000_000,
+        'reports_lookup_limit': 100_000,
+        'eth_staked_limit': 32_000,
+        'eth_staking_view': True,
+        'assets_graphs_view': True,
+        'statistics_view': True,
+    }
+
+    def __init__(self, msg_aggregator: 'MessagesAggregator') -> None:
+        self.msg_aggregator = msg_aggregator
+        self.status = SubscriptionStatus.ACTIVE
+        self._cached_limits: UserLimits | None = None
+        self.backend_enabled = False
+
+    @staticmethod
+    def _backend_disabled_error() -> PremiumApiError:
+        return PremiumApiError('Premium backend is disabled in offline mode')
+
+    def is_active(self) -> bool:
+        return True
+
+    def authenticate_device(self) -> None:
+        return
+
+    def fetch_limits(self) -> UserLimits:
+        if self._cached_limits is None:
+            self._cached_limits = cast(UserLimits, self._OFFLINE_LIMITS.copy())
+        return self._cached_limits
+
+    def get_capabilities(self) -> dict[str, bool]:
+        return {capability: True for capability in PREMIUM_CAPABILITIES_KEYS}
+
+    def query_premium_components(self) -> str:
+        raise self._backend_disabled_error()
+
+    def watcher_query(
+            self,
+            method: Literal['GET', 'PUT', 'PATCH', 'DELETE'],
+            data: dict[str, Any] | None,
+    ) -> Any:
+        raise RemoteError('Premium backend is disabled in offline mode')
+
+    def upload_data(
+            self,
+            data_blob: bytes,
+            our_hash: str,
+            last_modify_ts: Timestamp,
+            compression_type: Literal['zlib'],
+    ) -> None:
+        raise RemoteError('Premium backend is disabled in offline mode')
+
+    def pull_data(self) -> bytes | None:
+        raise RemoteError('Premium backend is disabled in offline mode')
+
+    def query_last_data_metadata(self) -> RemoteMetadata:
+        raise RemoteError('Premium backend is disabled in offline mode')
+
+    def get_remote_devices_information(self) -> dict:
+        raise RemoteError('Premium backend is disabled in offline mode')
+
+    def delete_device(self, device_id: str) -> None:
+        raise RemoteError('Premium backend is disabled in offline mode')
+
+
 def check_response_status_code(
         response: requests.Response,
         status_codes: Sequence[HTTPStatus],
@@ -299,6 +371,8 @@ def _decode_premium_json(response: requests.Response) -> Any:
 
 
 class Premium:
+
+    backend_enabled: Final[bool] = True
 
     def __init__(
             self,

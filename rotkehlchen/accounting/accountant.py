@@ -17,7 +17,7 @@ from rotkehlchen.errors.asset import UnknownAsset, UnprocessableTradePair, Unsup
 from rotkehlchen.errors.misc import AccountingError, RemoteError
 from rotkehlchen.errors.price import NoPriceForGivenTimestamp, PriceQueryUnsupportedAsset
 from rotkehlchen.logging import RotkehlchenLogsAdapter
-from rotkehlchen.premium.premium import Premium
+from rotkehlchen.premium.premium import OfflinePremium, Premium
 from rotkehlchen.types import EVM_CHAIN_IDS_WITH_TRANSACTIONS, Timestamp
 from rotkehlchen.user_messages import MessagesAggregator
 from rotkehlchen.utils.data_structures import DefaultLRUCache, LRUCacheWithRemove
@@ -72,7 +72,7 @@ class Accountant:
         self.processable_events_cache_signatures: DefaultLRUCache[int, list[int]] = DefaultLRUCache(default_factory=list, maxsize=PROCESSABLE_EVENTS_CACHE_SIZE)  # noqa: E501
         self.ignored_asset_ids: set[str] = set()  # populated in process_history so that we load them in memory once during accounting and not reload them from the DB for every single event processing  # noqa: E501
 
-    def activate_premium_status(self, premium: Premium) -> None:
+    def activate_premium_status(self, premium: Premium | OfflinePremium) -> None:
         self.premium = premium
 
     def deactivate_premium_status(self) -> None:
