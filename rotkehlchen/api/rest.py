@@ -3304,6 +3304,15 @@ class RestAPI:
 
     @async_api_call()
     def sync_data(self, action: Literal['upload', 'download']) -> dict[str, Any]:
+        if (
+            not self.rotkehlchen.premium_backend_enabled or
+            self.rotkehlchen.premium_sync_manager is None or
+            getattr(self.rotkehlchen.premium, 'backend_enabled', True) is False
+        ):
+            return wrap_in_fail_result(
+                'Premium backend is disabled in offline mode',
+                status_code=HTTPStatus.CONFLICT,
+            )
         try:
             success, msg = self.rotkehlchen.premium_sync_manager.sync_data(
                 action=action,

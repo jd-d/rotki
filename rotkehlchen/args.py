@@ -141,5 +141,10 @@ def app_args(prog: str, description: str) -> argparse.ArgumentParser:
         help="If given then task manager won't schedule new tasks",
         action='store_true',
     )
+    p.add_argument(
+        '--offline-premium',
+        help='Disable connections to the rotki premium backend while keeping local premium features enabled',
+        action='store_true',
+    )
 
     return p
