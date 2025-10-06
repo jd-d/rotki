@@ -78,10 +78,10 @@ Before installing rotki, ensure you have the following dependencies:
 
 📌 **Required Software**:
 - `Node.js`
-- `npm` (Node Package Manager)
+- `pnpm`
 - `Python 3.11`
-- `uv` (Python Package Manager)
-- `Docker`
+- `uv` (Python Project Manager)
+- `Rust toolchain`
 
 ---
 
@@ -95,6 +95,7 @@ rotki supports **Windows, macOS, and Linux**.
 
 📌 **Advanced Installation** (for developers):
 - [Build from Source](https://docs.rotki.com/requirement-and-installation/build-from-source.html)
+- [Windows build from source guide](docs/windows-build.rst)
 
 ---
 

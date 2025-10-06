@@ -8,3 +8,4 @@ Contents
    api
    websockets
    changelog
+   windows-build
