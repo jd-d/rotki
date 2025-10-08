@@ -36,6 +36,20 @@ create-cassette:
 	RECORD_CASSETTES=true uv run pytestgeventwrapper.py -m vcr $(filter-out $@,$(MAKECMDGOALS))
 
 
+# --- Minimal dev helpers (added 8/10/25) ---
+
+REST_PORT ?= 4242
+WS_PORT ?= 4333
+
+.PHONY: dev-backend dev-frontend
+
+dev-backend:
+	@echo "🚀 Starting backend on REST=$(REST_PORT) WS=$(WS_PORT)"
+	uv run python -m rotkehlchen --rest-api-port $(REST_PORT) --websockets-api-port $(WS_PORT)
+
+dev-frontend:
+	@echo "⚙️  Starting frontend dev server with backend venv (expects Node 22 & pnpm set up already)"
+	. .venv/bin/activate && cd frontend && pnpm run dev
 
 # A macro to catch extra makefile arguments and use them elsewhere
 # https://stackoverflow.com/a/6273809/110395

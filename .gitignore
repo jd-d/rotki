@@ -32,4 +32,5 @@ frontend/logs
 .pnpm-debug.log
 colibri/target
 **/.claude/
+frontend/.env.local
 out
