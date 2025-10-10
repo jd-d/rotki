@@ -265,7 +265,7 @@ declare module 'vue-router/auto-routes' {
       views: never
     }
     'src/pages/settings.vue': {
-      routes: '/settings' | '/settings/account/' | '/settings/accounting/' | '/settings/general/' | '/settings/modules/' | '/settings/database/' | '/settings/interface/' | '/settings/rpc/' | '/settings/oracle/' | '/settings/account' | '/settings/accounting' | '/settings/database' | '/settings/general' | '/settings/interface' | '/settings/modules' | '/settings/oracle' | '/settings/rpc'
+      routes: '/settings' | '/settings/account/' | '/settings/accounting/' | '/settings/database/' | '/settings/general/' | '/settings/interface/' | '/settings/modules/' | '/settings/oracle/' | '/settings/rpc/' | '/settings/account' | '/settings/accounting' | '/settings/database' | '/settings/general' | '/settings/interface' | '/settings/modules' | '/settings/oracle' | '/settings/rpc'
       views: 'default'
     }
     'src/pages/settings/account/index.vue': {
