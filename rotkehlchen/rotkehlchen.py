@@ -94,6 +94,7 @@ from rotkehlchen.history.types import HistoricalPrice, HistoricalPriceOracle
 from rotkehlchen.icons import IconManager
 from rotkehlchen.inquirer import Inquirer
 from rotkehlchen.logging import RotkehlchenLogsAdapter
+from rotkehlchen.networking import VPNManager
 from rotkehlchen.oracles.structures import CurrentPriceOracle
 from rotkehlchen.premium.premium import (
     OfflinePremium,
@@ -125,6 +126,7 @@ from rotkehlchen.types import (
     SupportedBlockchain,
     Timestamp,
 )
+from rotkehlchen.telemetry import TelemetryQueue, telemetry_collector
 from rotkehlchen.usage_analytics import maybe_submit_usage_analytics
 from rotkehlchen.user_messages import MessagesAggregator
 from rotkehlchen.utils.datadir import maybe_restructure_rotki_data_directory
@@ -181,6 +183,9 @@ class Rotkehlchen:
         self.greenlet_manager = GreenletManager(msg_aggregator=self.msg_aggregator)
         self.rotki_notifier = RotkiNotifier()
         self.msg_aggregator.rotki_notifier = self.rotki_notifier
+        self.telemetry: TelemetryQueue = TelemetryQueue()
+        telemetry_collector.set_queue(self.telemetry)
+        self.vpn_manager = VPNManager()
         self.exchange_manager = ExchangeManager(msg_aggregator=self.msg_aggregator)
         if self.dev_unlock_all_enabled:
             self.premium = OfflinePremium(self.msg_aggregator)
@@ -1435,10 +1440,13 @@ class Rotkehlchen:
 
                 if self.premium_sync_manager is not None:
                     result[DBCacheStatic.LAST_DATA_UPLOAD_TS.value] = Timestamp(self.premium_sync_manager.last_remote_data_upload_ts)  # noqa: E501
+
+                result['telemetry'] = self.telemetry.dump(limit=100)
         return result
 
     def shutdown(self) -> None:
         self.logout()
+        telemetry_collector.set_queue(None)
         self.shutdown_event.set()
 
     def create_oracle_cache(

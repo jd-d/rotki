@@ -57,6 +57,7 @@ export const Routes = {
   SETTINGS_MODULES: ensureRoute('/settings/modules'),
   SETTINGS_ORACLE: ensureRoute('/settings/oracle'),
   SETTINGS_RPC: ensureRoute('/settings/rpc'),
+  SETTINGS_TELEMETRY: ensureRoute('/settings/telemetry'),
   STAKING: ensureRoute('/staking/:location*'),
   STATISTICS: ensureRoute('/statistics'),
   STATISTICS_GRAPHS: ensureRoute('/statistics/graphs'),
@@ -307,6 +308,11 @@ export const useAppRoutes = createSharedComposable(() => {
       icon: 'lu-wifi' as const,
       route: Routes.SETTINGS_RPC,
       text: t('navigation_menu.settings_sub.rpc_nodes'),
+    },
+    SETTINGS_TELEMETRY: {
+      icon: 'lu-activity' as const,
+      route: Routes.SETTINGS_TELEMETRY,
+      text: t('navigation_menu.settings_sub.telemetry'),
     },
     STAKING: {
       icon: 'lu-layers' as const,

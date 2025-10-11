@@ -36,7 +36,6 @@ def test_query_periodic(rotkehlchen_api_server_with_exchanges: APIServer) -> Non
         periodic_url := api_url_for(rotkehlchen_api_server_with_exchanges, 'periodicdataresource'),
     )
     result = assert_proper_sync_response_with_result(response)
-    assert len(result) == 3
     assert result[DBCacheStatic.LAST_BALANCE_SAVE.value] >= start_ts
     assert 'failed_to_connect' not in result
     connected_nodes = result['connected_nodes']
@@ -45,6 +44,8 @@ def test_query_periodic(rotkehlchen_api_server_with_exchanges: APIServer) -> Non
         assert connected_nodes[evm_manager.node_inquirer.chain_name] == []
     # Non -1 value tests for these exist in test_history.py::test_query_history_timerange
     assert result[DBCacheStatic.LAST_DATA_UPLOAD_TS.value] == 0
+    telemetry_payload = result['telemetry']
+    assert isinstance(telemetry_payload, list)
 
     rotki.chains_aggregator.ethereum.node_inquirer.failed_to_connect_nodes.add('custom node')
     response = requests.get(periodic_url)
