@@ -31,6 +31,46 @@ This pattern balances **ease of syncing with upstream** and **ability to run a s
 - `mod`  -  long-lived branch that contains your running/custom changes.
 - `feat/*`  -  short-lived branches created from `mod` for discrete work.
 
+---
+
+## Lock down `develop` so it stays pristine
+
+These guardrails keep `origin/develop` as a clean mirror of `upstream/develop` while nudging all day-to-day work to `mod` and the short-lived feature branches.
+
+### 1. Protect `origin/develop` on GitHub
+
+1. Open your fork on GitHub → **Settings** → **Branches** → **Add branch protection rule**.
+2. Rule name: `develop`.
+3. Enable **Require a pull request before merging** with at least one approval (your own review is fine) and the status checks you rely on.
+4. Enable **Restrict who can push to matching branches** and list only your personal account so automation cannot push directly.
+5. Disable force pushes and branch deletion.
+
+Outcome: direct pushes from the sandbox (or any automation) to `origin/develop` will be rejected server-side.
+
+### 2. Make `mod` the default branch on your fork
+
+1. GitHub → **Settings** → **Branches** → **Default branch** → switch to `mod`.
+2. Confirm new clones and the GitHub UI land on `mod`, which is the branch meant for regular development.
+3. Keep `develop` available only for manual syncs from upstream.
+
+### 3. Install a local `pre-push` guard
+
+1. Copy the tracked hook template into your Git hooks directory:
+
+   ```bash
+   cp tools/hooks/pre-push .git/hooks/pre-push
+   chmod +x .git/hooks/pre-push
+   ```
+
+2. Try to push `develop` to `origin` without the override. The hook blocks it and prints a reminder to use `ALLOW_DEVELOP_PUSH=1` only for intentional syncs.
+3. When you really must update `origin/develop`, run:
+
+   ```bash
+   ALLOW_DEVELOP_PUSH=1 git push origin develop --force-with-lease
+   ```
+
+This local guard stops accidental pushes even before GitHub sees them.
+
 ![Rotki branch topology](https://www.plantuml.com/plantuml/png/VLHDRzD04BtlhnYb1-1WXHGg4HH5fIW-mQNfXHFQskCFnTwnPjSDBkA_C-kDW-sc-6JFl7dpviktrcbsRLqfLxeAuPxSeOGxrYOfu84QgYZlbBA7qZIQTGsCYTCc5-Xl1N2daqFEr9hqgo1visaRwnXrlTt2rMuLtyJn9HHncPV6O-8uNkzMbp0L9RhgQJx5DxkrXn2doBqRhZxqZrXZCcvVFYEihjMViLBDJCTUvIdaerw_nslvVYZAv63GMkX3_fMq2EKFHInWKf2dIgXkoA1ni1WyonIViA9c0TgUGt-UZ3F-7zGoPCG7U1jwyCxdEBTZbY7O9_p1T6Q_1Ayf7KFbyo8iG-sMTHTbvQynt9jdeh_vISZW6_9YXxdCj8v5zf3B6WTn0V92cnWYnaTjCPB553tv27soJ2FcPGJeKCKRs7UooKocVDQk91Esmghvd21AwMYYxQp1y1aoT4cnj4AZPhuXP5AkH3HjLVdKiOXe6U4nNDDHnfvLT5HJ_9J52nUAKqZ6LAkHOoRo16vQM_Xytobz9PUq5JQpO6yBiSjUyAiTcJHVGi9yGCwErDGtZGW9QkGSbumMdLA678AaBnnGzl9M0FPo7mbwf-FM5MBvKXrrv-ygSXIbsg52au8dcjFDb-G1PKbOStVk9h6OhSumrE1X_oSB-zaVhRoMMOafF25RMIInt_UDI8KiRolDLJTYkvLN-Ql-1G--)
 
 ---
