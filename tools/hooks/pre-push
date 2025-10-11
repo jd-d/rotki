@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+remote_name="${1:-}"
+
+if [[ "${remote_name}" != "origin" ]]; then
+  exit 0
+fi
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "${remote_ref}" == "refs/heads/develop" ]]; then
+    if [[ "${ALLOW_DEVELOP_PUSH:-}" != "1" ]]; then
+      cat <<'MSG' >&2
+Prevented push to origin/develop.
+Set ALLOW_DEVELOP_PUSH=1 to allow this push when you intentionally sync the branch.
+MSG
+      exit 1
+    fi
+  fi
+done
+
+exit 0
