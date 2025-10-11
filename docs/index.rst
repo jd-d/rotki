@@ -7,5 +7,6 @@ Contents
 
    api
    websockets
+   telemetry-dashboard
    changelog
    windows-build

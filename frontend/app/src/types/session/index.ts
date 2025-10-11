@@ -3,11 +3,27 @@ import type { CamelCase } from '@/types/common';
 import type { Module } from '@/types/modules';
 import { z } from 'zod/v4';
 
+export const TelemetryEvent = z.object({
+  timestamp: z.number(),
+  direction: z.enum(['inbound', 'outbound']),
+  subsystem: z.enum(['http', 'websocket', 'vpn']),
+  endpoint: z.string(),
+  route: z.string().nullable(),
+  latencyMs: z.number(),
+  statusCode: z.number().nullable(),
+  success: z.boolean(),
+  error: z.string().nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+export type TelemetryEvent = z.infer<typeof TelemetryEvent>;
+
 export const PeriodicClientQueryResult = z.object({
   connectedNodes: z.record(z.string(), z.array(z.string())),
   failedToConnect: z.record(z.string(), z.array(z.string())).optional(),
   lastBalanceSave: z.number(),
   lastDataUploadTs: z.number(),
+  telemetry: z.array(TelemetryEvent),
 });
 
 export type PeriodicClientQueryResult = z.infer<typeof PeriodicClientQueryResult>;

@@ -3515,7 +3515,8 @@
       "interface": "Interface-only",
       "modules": "Modules",
       "oracles": "Oracles",
-      "rpc_nodes": "RPC Nodes"
+      "rpc_nodes": "RPC Nodes",
+      "telemetry": "Network telemetry"
     },
     "staking": "Staking",
     "statistics": "Statistics",
@@ -3525,6 +3526,41 @@
     },
     "tag_manager": "Tag Manager",
     "wallet_bridge": "Wallet Bridge"
+  },
+  "telemetry": {
+    "title": "Network telemetry",
+    "subtitle": "Inspect recent networking activity captured across rotki.",
+    "filters": {
+      "title": "Filters",
+      "search": "Search",
+      "search_placeholder": "Filter by endpoint or route",
+      "direction": "Direction",
+      "direction_all": "All directions",
+      "direction_outbound": "Outbound",
+      "direction_inbound": "Inbound",
+      "subsystem": "Subsystem",
+      "subsystem_all": "All subsystems",
+      "route": "Route",
+      "route_all": "All routes"
+    },
+    "status": {
+      "failed": "Failed",
+      "success": "Success"
+    },
+    "table": {
+      "title": "Recent telemetry",
+      "headers": {
+        "timestamp": "Timestamp",
+        "subsystem": "Subsystem",
+        "direction": "Direction",
+        "endpoint": "Endpoint",
+        "route": "Route",
+        "latency": "Latency",
+        "status": "Status"
+      },
+      "direct_route": "Direct",
+      "empty": "No telemetry has been recorded yet."
+    }
   },
   "net_worth_chart": {
     "current_balance": "Current balance"

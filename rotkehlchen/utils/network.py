@@ -1,6 +1,7 @@
 import json
 import logging
 from collections.abc import Callable
+from time import perf_counter
 from http import HTTPStatus
 from typing import Any, Literal, overload
 
@@ -13,6 +14,7 @@ from rotkehlchen.constants import GLOBAL_REQUESTS_TIMEOUT
 from rotkehlchen.db.settings import CachedSettings
 from rotkehlchen.errors.misc import RemoteError, UnableToDecryptRemoteData
 from rotkehlchen.logging import RotkehlchenLogsAdapter
+from rotkehlchen.telemetry import telemetry_collector
 
 logger = logging.getLogger(__name__)
 log = RotkehlchenLogsAdapter(logger)
@@ -151,11 +153,24 @@ def retry_calls(
     - Raises RemoteError if there is something wrong with contacting the remote
     """
     tries = times
+    endpoint = str(kwargs.get('url') or method_name)
     while True:
+        start = perf_counter()
         try:
             result = function(**kwargs)
 
-            if handle_429 and result.status_code == HTTPStatus.TOO_MANY_REQUESTS:
+            status_code = getattr(result, 'status_code', None)
+            success = status_code is not None and status_code < HTTPStatus.BAD_REQUEST
+            telemetry_collector.record_event(
+                subsystem='http',
+                direction='outbound',
+                endpoint=endpoint,
+                latency_ms=(perf_counter() - start) * 1000,
+                status_code=status_code,
+                success=success,
+            )
+
+            if handle_429 and status_code == HTTPStatus.TOO_MANY_REQUESTS:
                 if tries == 0:
                     raise RemoteError(
                         f'{location} query for {method_name} failed after {times} tries',
@@ -172,6 +187,14 @@ def retry_calls(
             return result  # noqa: TRY300
 
         except requests.exceptions.RequestException as e:
+            telemetry_collector.record_event(
+                subsystem='http',
+                direction='outbound',
+                endpoint=endpoint,
+                latency_ms=(perf_counter() - start) * 1000,
+                success=False,
+                error=str(e),
+            )
             tries -= 1
             log.debug(
                 f'In retry_call for {location}-{method_name}. Got error {e!s} '
