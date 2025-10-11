@@ -33,6 +33,27 @@ This pattern balances **ease of syncing with upstream** and **ability to run a s
 
 ---
 
+## Sending changes upstream
+
+1. Sync your clean base:
+   ```bash
+   git fetch upstream
+   git checkout develop
+   git reset --hard upstream/develop
+   ```
+2. Branch from that mirror (cherry-pick from `mod` if needed):
+   ```bash
+   git checkout -b feat/my-fix
+   ```
+3. Implement and test locally, then push the feature branch to your fork:
+   ```bash
+   git push -u origin feat/my-fix
+   ```
+4. Open a PR from `origin/feat/my-fix` → `upstream/develop`.
+5. After merge, rebase `mod` onto the updated `upstream/develop` so your custom build picks up the upstream change.
+
+---
+
 ## Keeping `mod` in sync with upstream safely
 
 ### Update `develop` to upstream
@@ -221,4 +242,3 @@ git push origin mod --force-with-lease
 ---
 
 *End of file.*
-

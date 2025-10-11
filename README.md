@@ -132,6 +132,7 @@ We welcome contributions from the community! 🎉
 🔹 **Getting Started**:
 - Read the [Contribution Guide](CONTRIBUTING.md)
 - Explore the [Developer Guide](https://docs.rotki.com/contribution-guides/)
+- Check `PIPELINE_FOR_GIT.md` for a local workflow covering feature branch PRs and long-lived mod syncing
 - Check out [Open Issues](https://github.com/rotki/rotki/issues)
 
 📌 **Claim Your Contributor Badge!**  
