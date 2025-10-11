@@ -128,7 +128,7 @@ from rotkehlchen.types import (
 from rotkehlchen.usage_analytics import maybe_submit_usage_analytics
 from rotkehlchen.user_messages import MessagesAggregator
 from rotkehlchen.utils.datadir import maybe_restructure_rotki_data_directory
-from rotkehlchen.utils.misc import combine_dicts, ts_now
+from rotkehlchen.utils.misc import combine_dicts, is_dev_unlock_all_enabled, ts_now
 
 if TYPE_CHECKING:
     from rotkehlchen.chain.bitcoin.xpub import XpubData
@@ -160,6 +160,9 @@ class Rotkehlchen:
         self.args = args
         self.offline_premium_mode = self.args.offline_premium
         self.premium_backend_enabled = not self.offline_premium_mode
+        self.dev_unlock_all_enabled = is_dev_unlock_all_enabled()
+        if self.dev_unlock_all_enabled:
+            self.premium_backend_enabled = False
         if self.args.data_dir is None:
             self.data_dir = default_data_directory()
         else:
@@ -179,6 +182,8 @@ class Rotkehlchen:
         self.rotki_notifier = RotkiNotifier()
         self.msg_aggregator.rotki_notifier = self.rotki_notifier
         self.exchange_manager = ExchangeManager(msg_aggregator=self.msg_aggregator)
+        if self.dev_unlock_all_enabled:
+            self.premium = OfflinePremium(self.msg_aggregator)
         # Initialize the GlobalDBHandler singleton. Has to be initialized BEFORE asset resolver
         globaldb = GlobalDBHandler(
             data_dir=self.data_dir,

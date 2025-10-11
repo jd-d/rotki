@@ -1,10 +1,11 @@
 import type { Currency } from '@/types/currencies';
 import { Defaults } from '@/data/defaults';
+import { Module } from '@/types/modules';
 import { type AccountingSettings, CostBasisMethod, type GeneralSettings } from '@/types/user';
 
 export function defaultGeneralSettings(mainCurrency: Currency): GeneralSettings {
   return {
-    activeModules: [],
+    activeModules: Object.values(Module) as Module[],
     addressNamePriority: [],
     askUserUponSizeDiscrepancy: true,
     autoCreateCalendarReminders: true,
