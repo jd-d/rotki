@@ -1,0 +1,8 @@
+exports[`TimeframeSelector premium override renders all timeframe controls unlocked when override is active 1`] = `
+<div class="flex gap-4 items-center text-center">
+  <div data-test="button-group">
+    <button data-test="timeframe-button">remember</button>
+    <button data-test="timeframe-button">extended</button>
+  </div>
+</div>
+`;

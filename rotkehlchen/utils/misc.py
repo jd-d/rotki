@@ -3,6 +3,7 @@ import datetime
 import functools
 import logging
 import operator
+import os
 import re
 import sys
 import time
@@ -25,6 +26,23 @@ if TYPE_CHECKING:
     from requests import Session
 
 log = logging.getLogger(__name__)
+
+
+def _normalize_env_flag(value: str | None) -> bool:
+    if value is None:
+        return False
+
+    normalized = value.strip().lower()
+    return normalized not in {'', '0', 'false', 'no'}
+
+
+def is_dev_unlock_all_enabled() -> bool:
+    """Return True if the developer premium override is enabled."""
+
+    if not _normalize_env_flag(os.environ.get('ROTKI_DEV_UNLOCK_ALL')):
+        return False
+
+    return not is_production()
 
 
 def ts_now() -> Timestamp:

@@ -9,11 +9,17 @@ import { Section, Status } from '@/types/status';
 import { TaskType } from '@/types/task-type';
 import { isTaskCancelled } from '@/utils/index';
 import { logger } from '@/utils/logging';
+import { isDevUnlockAllEnabled } from '@/utils/dev-flags';
 
 export async function fetchDataAsync<T extends TaskMeta, R>(data: FetchData<T, R>, state: Ref<R>): Promise<void> {
+  const devUnlockAllEnabled = isDevUnlockAllEnabled();
+
   if (
-    !get(data.state.activeModules).includes(data.requires.module)
-    || (data.requires.premium && !get(data.state.isPremium))
+    !devUnlockAllEnabled
+    && (
+      !get(data.state.activeModules).includes(data.requires.module)
+      || (data.requires.premium && !get(data.state.isPremium))
+    )
   ) {
     logger.debug(`module ${data.requires.module} inactive or not premium`);
     return;

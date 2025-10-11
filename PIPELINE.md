@@ -117,6 +117,12 @@ uv run python -m rotkehlchen --api-port 4242 --websockets-port 4333
 - To let the frontend spawn the backend again, rename or delete `frontend/.env.local`, or set `ROTKI_BACKEND_DISABLED=false`.
 - To return to dual-terminal mode, restore the overrides above and restart the backend/frontend pair.
 
+### Premium UI override for local development
+
+- Add `VITE_ROTKI_DEV_UNLOCK_ALL=true` to `frontend/.env.local` to keep the frontend in premium mode during local runs.
+- Export `ROTKI_DEV_UNLOCK_ALL=true` before starting the backend (or add it to your shell profile) so the API mirrors the override.
+- The flags default to off, so production builds and regular contributors will not see any change unless they opt in.
+
 ---
 
 ## 3) Tests (doc-aligned)

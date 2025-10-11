@@ -1,0 +1,15 @@
+exports[`ThemeSettingsCategory premium override renders theme manager when override is active 1`] = `
+<section data-test="setting-category">
+  <header>
+    premium_components.theme_manager.text
+  </header>
+  <p>
+    premium_components.theme_manager.text_hint
+  </p>
+  <div>
+    <div data-test="settings-item">
+      <div data-test="theme-manager"></div>
+    </div>
+  </div>
+</section>
+`;

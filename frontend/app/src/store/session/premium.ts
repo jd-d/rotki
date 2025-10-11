@@ -2,9 +2,18 @@ import type { ActionStatus } from '@/types/action';
 import type { PremiumCredentialsPayload } from '@/types/session';
 import { usePremiumCredentialsApi } from '@/composables/api/session/premium-credentials';
 import { ApiValidationError, type ValidationErrors } from '@/types/api/errors';
+import { isDevUnlockAllEnabled } from '@/utils/dev-flags';
 
 export const usePremiumStore = defineStore('session/premium', () => {
-  const premium = ref(false);
+  const devUnlockAllEnabled = isDevUnlockAllEnabled();
+
+  const premiumState = ref(devUnlockAllEnabled);
+  const premium = computed({
+    get: () => premiumState.value,
+    set: (value: boolean) => {
+      premiumState.value = devUnlockAllEnabled ? true : value;
+    },
+  });
   const premiumSync = ref(false);
 
   const api = usePremiumCredentialsApi();
