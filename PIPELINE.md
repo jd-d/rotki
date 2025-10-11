@@ -12,6 +12,7 @@
 - [5) Minimal Makefile helpers (optional)](#5-minimal-makefile-helpers-optional)
 - [6) Troubleshooting](#6-troubleshooting)
 - [7) Optional: Codex workflow](#7-optional-codex-workflow)
+- [8) Git workflow extras](#8-git-workflow-extras)
 
 ---
 
@@ -20,7 +21,7 @@
 - `Codex CLI (local workspace)` runs inside this checkout and is used for day-to-day development, builds, local tests, and actually launching rotki. It can read uncommitted files such as this pipeline.
 - `ChatGPT/GitHub sandbox` operates on temporary branches fetched from GitHub and is only used for code edits and automated tests. It never sees untracked files or your local environment.
 
-> **Note:** keep this document free of secrets or credentials. Treat it as shared operational guidance that both environments may rely on.
+> **Note:** keep this document free of secrets or credentials. Treat it as shared operational guidance that both environments may rely on. High-level mod objectives live in `TODO.md`.
 
 ---
 
@@ -79,6 +80,8 @@ pnpm install --frozen-lockfile     # first time / when lock changes
 pnpm run dev
 ```
 
+> **Quick launch:** Once the steps above are done the first time, you can simply run `./run-dev-single.sh` from the repo root. It wraps the virtualenv activation, Node 22 switch, Corepack setup, dependency install (if needed), and `pnpm run dev` in one command.
+
 If a red error page says the backend is already running, another process is bound to those ports; see [Troubleshooting](#6-troubleshooting).
 
 ---
@@ -107,6 +110,8 @@ uv run python -m rotkehlchen --api-port 4242 --websockets-port 4333
   corepack enable && corepack prepare pnpm@10.15.0 --activate
   pnpm run dev
   ```
+
+> **Quick launch:** Use `./run-dev-dual.sh backend` for Terminal A and `./run-dev-dual.sh frontend` for Terminal B. The script exports the required environment variables and installs dependencies on-demand.
 
 **Switching modes quickly**
 - To let the frontend spawn the backend again, rename or delete `frontend/.env.local`, or set `ROTKI_BACKEND_DISABLED=false`.
@@ -215,3 +220,7 @@ git diff && git add -p && git commit -m "codex: implement X"
 ---
 
 *Last updated: 2025-10-08.*
+
+## 8) Git workflow extras
+
+- See `PIPELINE_FOR_GIT.md` (in the repo root) for a hands-on rebasing pipeline tailored to keeping a long-lived `mod` branch synced with `upstream/develop`. It includes command sequences, conflict-resolution tips, and diagrams.

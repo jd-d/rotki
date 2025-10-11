@@ -109,6 +109,9 @@ For **detailed setup and usage guides**, visit our [documentation](https://docs.
 - Configure settings & import your addresses.
 - Start managing and analyzing your portfolio! 🚀
 
+🛠 **Working on the codebase?**  
+Local setup helpers live in `PIPELINE.md`, and long-lived-branch/rebase guidance is in `PIPELINE_FOR_GIT.md`.
+
 ---
 
 <div id="changelog"></div>
@@ -188,4 +191,3 @@ rotki is open-source and distributed under the **AGPLv3 License**.
 📜 **[Read the Full License](https://github.com/rotki/rotki/blob/develop/LICENSE.md)**
 
 <p align="right">(<a href="#top">🔼 Back to top</a>)</p>
-
