@@ -24,8 +24,13 @@ has() { command -v "$1" >/dev/null 2>&1; }
 
 if has apt-get; then
   echo "[setup v8] Apt bootstrap: Installing base packages..."
-  sudo apt-get update -y
-  sudo apt-get install -y --no-install-recommends curl ca-certificates gnupg git-lfs
+  if sudo apt-get update -y; then
+    if ! sudo apt-get install -y --no-install-recommends curl ca-certificates gnupg git-lfs; then
+      echo "[setup v8][warn] apt install failed, continuing without optional packages" >&2
+    fi
+  else
+    echo "[setup v8][warn] apt update failed, skipping apt package installation" >&2
+  fi
 fi
 
 # ---------------------------
@@ -81,22 +86,45 @@ export UV_PYTHON="${UV_PY_PATH}"
 # ---------------------------
 
 # Install Frontend Dependencies
-if [ -f "frontend/app/package.json" ]; then
+if [ -f "frontend/package.json" ]; then
   echo "[setup v8] Frontend detected, installing dependencies..."
-  if [ ! -f frontend/app/.npmrc ]; then
-    printf "registry=https://registry.npmjs.org/\nalways-auth=false\n" > frontend/app/.npmrc
+  if [ ! -f frontend/.npmrc ]; then
+    printf "registry=https://registry.npmjs.org/\nalways-auth=false\n" > frontend/.npmrc
   fi
-  pnpm -C frontend/app install --frozen-lockfile
+  if ! pnpm -C frontend install --frozen-lockfile; then
+    echo "[setup v8][warn] pnpm install failed, retrying without lifecycle scripts" >&2
+    if pnpm -C frontend install --frozen-lockfile --ignore-scripts; then
+      echo "[setup v8] Manually replaying skipped frontend lifecycle scripts..."
+      if ! (cd frontend && node scripts/check-versions.js); then
+        echo "[setup v8][warn] frontend version check failed" >&2
+      fi
+      if ! pnpm -C frontend run --filter @rotki/common build; then
+        echo "[setup v8][warn] failed to build @rotki/common" >&2
+      fi
+      if ! pnpm -C frontend run --filter rotki postinstall; then
+        echo "[setup v8][warn] frontend postinstall failed" >&2
+      fi
+    else
+      echo "[setup v8][error] pnpm install failed even when ignoring scripts" >&2
+      exit 1
+    fi
+  fi
 fi
 
 # Install Python Docs Dependencies
 echo "[setup v8] Configuring Python docs toolchain..."
 # Use the globally active python for this, as it's a toolchain setup
-python -m pip install --upgrade pip
+if ! python -m pip install --upgrade pip; then
+  echo "[setup v8][warn] pip upgrade failed; continuing with existing version" >&2
+fi
 if [ -f docs/requirements.txt ]; then
-  python -m pip install -r docs/requirements.txt
+  if ! python -m pip install -r docs/requirements.txt; then
+    echo "[setup v8][warn] docs requirements installation failed" >&2
+  fi
 else
-  python -m pip install "sphinx>=7" myst-parser sphinx-rtd-theme
+  if ! python -m pip install "sphinx>=7" myst-parser sphinx-rtd-theme; then
+    echo "[setup v8][warn] default docs dependencies installation failed" >&2
+  fi
 fi
 if has apt-get; then
   (sudo apt-get install -y --no-install-recommends graphviz) || echo "[warn] Skipping optional graphviz install"
