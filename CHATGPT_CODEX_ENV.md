@@ -1,3 +1,12 @@
+# ChatGPT Codex Environment Setup
+
+This document centralizes the resources required to run rotki in the ChatGPT Codex managed environment. The setup script lives here so it can be copied into the **Setup script** field of the environment settings. The script is **never** executed directly from the repository checkout.
+
+## Setup Script v8
+
+> Copy the following block verbatim into the ChatGPT Codex Rotki environment's **Setup script** field. It is intended for that UI only.
+
+```bash
 #!/usr/bin/env bash
 #
 # setup.v8.sh
@@ -158,3 +167,24 @@ else
 fi
 
 echo "[setup v8] ✅ Done! Environment is ready. ✨"
+```
+
+## Update Protocol for Assistants
+
+When a user asks for changes to the setup script:
+
+1. Draft the updated script and run it inside the active workspace to ensure it finishes successfully and prepares the ChatGPT Codex environment as expected. Capture logs for review.
+2. Once the smoke test is green, replace the script block above with the new version.
+3. In the pull request summary or comments, include a copy-ready link to the raw Markdown file. Use `https://raw.githubusercontent.com/rotki/rotki/<branch>/CHATGPT_CODEX_ENV.md?plain=1` (substitute `<branch>` with the PR branch name) so maintainers can copy the script without Markdown delimiters.
+4. Call out in the PR description that the maintainer must paste the script into the ChatGPT Codex environment settings and re-run the built-in interactive terminal to verify it.
+
+## Maintainer Checklist
+
+Maintainers should follow the steps below after receiving a script update:
+
+1. Open the raw link shared in the PR, copy the script, and paste it into the ChatGPT Codex Rotki environment's **Setup script** field.
+2. Connect the environment's interactive terminal to execute the script and ensure it completes successfully.
+3. Save the updated script in the ChatGPT Codex environment settings and confirm it persisted by refreshing the settings page.
+4. Merge the pull request only after the manual verification succeeds.
+
+If additional automation (such as a GitHub Action that surfaces the script content) is needed, coordinate with the repository maintainers before merging.
