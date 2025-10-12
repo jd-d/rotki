@@ -8,5 +8,6 @@ Contents
    api
    websockets
    telemetry-dashboard
+   vpn-routing
    changelog
    windows-build
