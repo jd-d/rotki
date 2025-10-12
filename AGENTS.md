@@ -9,6 +9,21 @@ Rotki is a privacy-focused crypto portfolio management and tax reporting applica
 - **Vue.js/TypeScript frontend** (Electron desktop app + web interface)
 - **Rust service** (Colibri - performance-critical components)
 
+## ChatGPT Codex Environment Setup Protocol
+
+- The ChatGPT Codex environment bootstrap script now lives in `CHATGPT_CODEX_ENV.md` as a fenced code block. Copy it into the
+  environment's **Setup script** field instead of running it from the repository.
+- When a user asks for script updates:
+  1. Draft the new script and execute it inside the active workspace to confirm it prepares the environment successfully.
+  2. Update the script block in `CHATGPT_CODEX_ENV.md` once the smoke test passes.
+  3. Share a copy-ready link in the PR (for example
+     `https://raw.githubusercontent.com/rotki/rotki/<branch>/CHATGPT_CODEX_ENV.md?plain=1`) so maintainers can grab the script
+     without Markdown fencing.
+  4. Highlight in the PR message that maintainers must paste the script into the Codex settings and re-run the environment's
+     interactive terminal before merging.
+- The maintainer checklist for this flow is documented in `CHATGPT_CODEX_ENV.md`. Coordinate with repository owners if extra
+  automation (such as a GitHub Action that surfaces the script contents) is required.
+
 ## Development Commands
 
 ### Prerequisites
