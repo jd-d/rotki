@@ -12,11 +12,15 @@ This document centralizes the resources required to run rotki in the ChatGPT Cod
 # setup.sh
 #
 # Author: Gemini (Google AI)
+# Version: 2024-11-19 restore version banner
 #
 
 set -euo pipefail
 
+VERSION_LABEL="2024-11-19 restore version banner"
+
 echo "[setup] Start unified environment bootstrap"
+echo "[setup] Script version: ${VERSION_LABEL}"
 
 # ---------------------------
 # 1) System & Tooling Bootstrap
@@ -160,6 +164,13 @@ fi
 
 echo "[setup] ✅ Done! Environment is ready. ✨"
 ```
+
+## Setup Script Changelog
+
+### 2024-11-19
+
+- Restored the inline version banner in the script so assistants and maintainers can confirm the revision when it runs or is saved in the environment settings.
+- Documented the expectation that future updates keep the banner concise (date plus a few words) and expand on the details here instead.
 
 ## Setup Script Gotchas
 
