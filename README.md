@@ -36,6 +36,7 @@
 - [🔧 Requirements](#requirements)
 - [🚀 Installation](#installation)
 - [📘 Usage](#usage)
+- [🤖 ChatGPT Codex Environment Setup](#chatgpt-codex-environment-setup)
 - [📜 Changelog](#changelog)
 - [🤝 Contribute](#contribute)
 - [📢 Get in Touch](#get-in-touch)
@@ -109,8 +110,19 @@ For **detailed setup and usage guides**, visit our [documentation](https://docs.
 - Configure settings & import your addresses.
 - Start managing and analyzing your portfolio! 🚀
 
-🛠 **Working on the codebase?**  
+🛠 **Working on the codebase?**
 Local setup helpers live in `PIPELINE.md`, and long-lived-branch/rebase guidance is in `PIPELINE_FOR_GIT.md`.
+
+<div id="chatgpt-codex-environment-setup"></div>
+
+## 🤖 **ChatGPT Codex Environment Setup**
+
+The ChatGPT Codex managed workspace relies on the script documented in [CHATGPT_CODEX_ENV.md](./CHATGPT_CODEX_ENV.md). Copy the
+script block from that file into the environment's **Setup script** field—do not run it directly inside the repository. The doc
+describes the verification workflow for future updates, including the smoke test requirement and the need to share a copy-ready
+raw link so maintainers can re-test it before merging changes.
+
+Maintainers should follow the checklist in `CHATGPT_CODEX_ENV.md` to validate new scripts within the Codex settings UI.
 
 ---
 

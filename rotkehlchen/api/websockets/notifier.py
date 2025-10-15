@@ -3,6 +3,7 @@ import json
 import logging
 from collections.abc import Callable
 from contextlib import suppress
+from time import perf_counter
 from typing import TYPE_CHECKING, Any
 
 from gevent.lock import Semaphore
@@ -12,6 +13,7 @@ from geventwebsocket.websocket import WebSocket
 
 from rotkehlchen.logging import RotkehlchenLogsAdapter
 from rotkehlchen.serialization.serialize import process_result
+from rotkehlchen.telemetry import telemetry_collector
 
 if TYPE_CHECKING:
     from rotkehlchen.api.websockets.typedefs import WSMessageType
@@ -89,6 +91,7 @@ class RotkiNotifier:
 
         to_remove_indices = set()
         spawned_one_broadcast = False
+        start_time = perf_counter()
         for idx, websocket in enumerate(self.subscribers):
             if websocket.closed is True:
                 to_remove_indices.add(idx)
@@ -112,6 +115,15 @@ class RotkiNotifier:
         if spawned_one_broadcast is False and failure_callback is not None:
             failure_callback_args = {} if failure_callback_args is None else failure_callback_args
             failure_callback(**failure_callback_args)
+
+        telemetry_collector.record_event(
+            subsystem='websocket',
+            direction='outbound',
+            endpoint=str(message_type),
+            latency_ms=(perf_counter() - start_time) * 1000,
+            success=spawned_one_broadcast,
+            metadata={'subscribers': len(self.subscribers)},
+        )
 
 
 class RotkiWSApp(WebSocketApplication):

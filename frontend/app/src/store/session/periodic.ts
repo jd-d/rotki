@@ -1,6 +1,7 @@
 import { backoff } from '@shared/utils';
 import { useSessionApi } from '@/composables/api/session';
 import { useNotificationsStore } from '@/store/notifications';
+import type { TelemetryEvent } from '@/types/session';
 
 export const usePeriodicStore = defineStore('session/periodic', () => {
   const lastBalanceSave = ref(0);
@@ -8,6 +9,7 @@ export const usePeriodicStore = defineStore('session/periodic', () => {
   const connectedNodes = ref<Record<string, string[]>>({});
   const failedToConnect = ref<Record<string, string[]>>({});
   const periodicRunning = ref(false);
+  const telemetry = ref<TelemetryEvent[]>([]);
 
   const { notify } = useNotificationsStore();
   const { t } = useI18n({ useScope: 'global' });
@@ -30,6 +32,7 @@ export const usePeriodicStore = defineStore('session/periodic', () => {
         failedToConnect: failed,
         lastBalanceSave: balance,
         lastDataUploadTs: upload,
+        telemetry: telemetryEvents,
       } = result;
 
       if (get(lastBalanceSave) !== balance)
@@ -40,6 +43,7 @@ export const usePeriodicStore = defineStore('session/periodic', () => {
 
       set(connectedNodes, connected);
       set(failedToConnect, failed);
+      set(telemetry, telemetryEvents);
     }
     catch (error: any) {
       notify({
@@ -61,6 +65,7 @@ export const usePeriodicStore = defineStore('session/periodic', () => {
     failedToConnect,
     lastBalanceSave,
     lastDataUpload,
+    telemetry,
   };
 });
 

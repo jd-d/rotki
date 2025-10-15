@@ -20,6 +20,7 @@ const tabs = computed<TabContent[]>(() => {
     Routes.SETTINGS_ACCOUNTING,
     Routes.SETTINGS_ORACLE,
     Routes.SETTINGS_RPC,
+    Routes.SETTINGS_TELEMETRY,
     Routes.SETTINGS_MODULES,
     Routes.SETTINGS_INTERFACE,
   ];
